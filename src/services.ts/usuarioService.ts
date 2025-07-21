@@ -1,8 +1,7 @@
 import { prisma } from "../config/db";
 import { hashearPassword, verificarPassword } from "../helpers/hashearPassword";
-import { Usuario, mapUsuario } from "../Types/Usuarios";
+import { Usuario, mapUsuario, privUsuario } from "../Types/Usuarios";
 import { generarJWT } from "../helpers/generarJWT";
-import { enviarEmailRegistro } from "../helpers/emailRegistro";
 import { Request, Response } from "express";
 
 const getUsuarioService = async (id: number): Promise<Usuario | null> => {
@@ -29,7 +28,16 @@ const getUsuarioByEmailService = async (email: string): Promise<Usuario | null> 
         }
     });
 
-    return usuario ? mapUsuario(usuario) : null;
+    return {
+        id: usuario?.id || 0,
+        email: usuario?.email || "",
+        nombre: usuario?.nombre || "",
+        contrasenna: usuario?.contrasenna || "",
+        activado: usuario?.activado || false,
+        telefono: usuario?.telefono || null,
+        creado_en: usuario?.creado_en || new Date(0),
+        token: usuario?.token || undefined,
+    }
 }
 
 
@@ -74,7 +82,8 @@ const crearUsuarioService = async (req: Request, res: Response): Promise<Usuario
         }
     });
 
-    await enviarEmailRegistro(email, token || "");
+    console.log(email, token);
+    // await enviarEmailRegistro(email, token || "");
 
     return {
         id: usuario.id,
@@ -89,21 +98,29 @@ const crearUsuarioService = async (req: Request, res: Response): Promise<Usuario
 
 }
 
-const actualizarUsuarioService = async (req: Request, res: Response): Promise<Usuario> => {
+const actualizarUsuarioService = async (req: Request, res: Response): Promise<privUsuario> => {
     const { id } = req.params;
-    const { email, nombre, telefono } = req.body;
+    const { email, nombre, telefono, contrasenna } = req.body;
     const usuarioExistente = await getUsuarioService(Number(id));
 
     if (!usuarioExistente) {
         throw new Error("Usuario no encontrado");
     }
 
+    let hashContrasenna: string | undefined;
+    if (contrasenna) {
+        hashContrasenna = await hashearPassword(contrasenna);
+        if (!hashContrasenna) {
+            throw new Error("Error al hashear la contraseña");
+        }
+    }
     const usuario = await prisma.usuario.update({
         where: { id: Number(id) },
         data: {
-            email,
-            nombre,
-            telefono: telefono || null
+            email: email || usuarioExistente.email,
+            nombre: nombre || usuarioExistente.nombre,
+            contrasenna: hashContrasenna || usuarioExistente.contrasenna,
+            telefono: telefono || usuarioExistente.telefono,
         },
         include: {
             generadores: true,
@@ -145,10 +162,10 @@ const verificarUsuarioService = async (req: Request, res: Response): Promise<voi
     });
 };
 
-const manejoLoginService = async (req: Request, res: Response): Promise<Usuario | null> => {
+const manejoLoginService = async (req: Request, res: Response): Promise<Usuario | void> => {
 
     const { email, contrasenna } = req.body;
-    const usuario = await getUsuarioByEmailService(email);
+    const usuario = await getUsuarioByEmailService(email); 
     if (!usuario) {
         throw new Error("Usuario no encontrado");
     }
@@ -164,13 +181,12 @@ const manejoLoginService = async (req: Request, res: Response): Promise<Usuario 
         }
     }
 
-    usuario.token = generarJWT({ id: usuario.id });
+    const tokenLogin = generarJWT({ id: usuario.id });
     await prisma.usuario.update({
         where: { id: usuario.id },
-        data: { token: usuario.token }
+        data: { token: tokenLogin }
     });
-
-    return usuario;
+    console.log("Usuario autenticado:", usuario.email, "Token:", tokenLogin);
 }
 
 const manejoLogOutService = async (req: Request, res: Response): Promise<void> => {

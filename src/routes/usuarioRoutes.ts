@@ -11,23 +11,23 @@ import
     manejoLogOut,
     cambioContrasenna
 } from '../controllers/usuarioController';
+import authMiddleware from '../middleware/authMiddleware';
 
 const routerUsuario = express.Router();
 
 //Rutas publicas
 routerUsuario.route('/perfiles/').get(getUsuarios);
 routerUsuario.route('/signup').post(crearUsuario);
-routerUsuario.route('/login').get(manejoLogin);
-routerUsuario.route('/verificar/:token').get(verificarUsuario);
+routerUsuario.route('/login').post(manejoLogin);
+routerUsuario.route('/verificar/:token').post(verificarUsuario);
 routerUsuario.route('/delete/:id').delete(eliminarUsuario);
-routerUsuario.route('/recuperar-contrasena/:token').put(cambioContrasenna);
+routerUsuario.route('/recuperar-contrasena/:token').post(cambioContrasenna);
 routerUsuario.route('/logout/:id').post(manejoLogOut);
 
 //Rutas privadas
-routerUsuario.route('/perfil/:id').get(getUsuario);
-routerUsuario.route('/actualizar/:id').put(actualizarUsuario);
-
-
+routerUsuario.route('/perfil/:id').get(authMiddleware, getUsuario);
+routerUsuario.route('/actualizar/:id').put(authMiddleware, actualizarUsuario);
+routerUsuario.route('/eliminar/:id').delete(authMiddleware, eliminarUsuario);
 
 
 export default routerUsuario;

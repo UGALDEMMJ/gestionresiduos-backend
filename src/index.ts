@@ -2,8 +2,8 @@ import express from 'express';
 import { TestDbConnection } from './config/db';
 import usuarioRoutes from './routes/usuarioRoutes'
 import transporteRoutes from './routes/transporteRoutes'
-import residuoRoutes from './routes/transporteRoutes'
-import generadorRoutes from './routes/transporteRoutes'
+import residuoRoutes from './routes/residuoRoutes'
+import generadorRoutes from './routes/generadorRoutes'
 
 
 const app = express();

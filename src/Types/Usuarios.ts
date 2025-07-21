@@ -7,9 +7,18 @@ export type Usuario = {
   activado?: boolean; // Optional, as it may not be returned in some contexts
   token?: string; // Optional, as it may not be returned in some contexts 
   creado_en: Date;
-  generadores: string[];
-  transportes: string[];
-  residuos: string[];
+  generadores?: string[];
+  transportes?: string[];
+  residuos?: string[];
+}
+
+export type privUsuario = {
+  id: number;
+  email: string;
+  nombre: string;
+  contrasenna?: string; 
+  activado?: boolean; 
+  token?: string; 
 }
 
 

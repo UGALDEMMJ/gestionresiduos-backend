@@ -46,7 +46,7 @@ const getUsuario = async (req: Request, res: Response): Promise<void> => {
 const actualizarUsuario = async (req: Request, res: Response): Promise<void> => {
     try {
         const usuario = await actualizarUsuarioService(req, res);
-        res.status(200).json(usuario);
+        res.status(200).json({ message: "Usuario actualizado correctamente", usuario });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
@@ -56,7 +56,7 @@ const actualizarUsuario = async (req: Request, res: Response): Promise<void> => 
 const eliminarUsuario = async (req: Request, res: Response): Promise<void> => {
     try {
         await eliminarUsuarioService(req, res);
-        res.status(204).send();
+        res.status(200).json({ message: "Usuario eliminado correctamente" });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
@@ -76,11 +76,7 @@ const verificarUsuario = async (req: Request, res: Response): Promise<void> => {
 const manejoLogin = async (req: Request, res: Response): Promise<void> => {
     try {
         const usuario = await manejoLoginService(req, res);
-        if (!usuario) {
-            res.status(401).json({ error: "Credenciales inválidas" });
-            return;
-        }
-        res.status(200).json(usuario);
+        res.status(200).json({ message: "Sesión iniciada correctamente", usuario });
     } catch (error) {
         res.status(500).json({ error: "Error al iniciar sesión" });
     }

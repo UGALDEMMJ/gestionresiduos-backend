@@ -4,7 +4,7 @@ interface Payload {
   id: number;
 }
 
-const JWT_SECRET = process.env.SECRET || 'secretosuperduperseguro';
+const JWT_SECRET = process.env.SECRET as string;
 const EXPIRES_IN = '12h'; // 12 hours
 
 export const generarJWT = (payload: Payload): string => {

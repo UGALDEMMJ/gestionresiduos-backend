@@ -1,21 +1,21 @@
-import { MailService } from "@sendgrid/mail";
+import { Resend } from "resend";
 
-const mailService = new MailService();
-if (!process.env.SENDGRID_API_KEY) {
-    throw new Error("SENDGRID_API_KEY environment variable is not defined");
-}
-mailService.setApiKey(process.env.SENDGRID_API_KEY as string);
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
 
 export const enviarEmailRegistro = async (email: string, token: string) => {
-    const msg = {
-        to: email,
-        from: "ugaldemoralesmj@gmail.com",
-        subject: "Verifica tu cuenta",
-        text: `Por favor verifica tu cuenta usando el link: http://localhost:3000/api/usuario/verificar/${token}`,
-    };
+    const urlVerificacion = `http://localhost:3000/api/usuario/verificar/${token}`;
 
     try {
-        await mailService.send(msg);
+        const { data, error } = await resend.emails.send({
+            from: "ugaldemorales@ejemplo.com",
+            to: email,
+            subject: "Verifica tu cuenta",
+            text: `Por favor verifica tu cuenta usando el link: ${urlVerificacion}`,
+        });
+
+        if (error) throw error;
+        console.log('Correo enviado con Resend:', data?.id);
     } catch (error) {
         console.error("Error al enviar el email:", error);
         throw new Error("Error al enviar el email");
