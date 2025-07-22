@@ -12,9 +12,9 @@ app.use(express.json());
 TestDbConnection();
 
 app.use("/api/usuario", usuarioRoutes)
-app.use("/api/generador", transporteRoutes)
-app.use("/api/transporte", residuoRoutes)
-app.use("/api/residuo", generadorRoutes)
+app.use("/api/generador", generadorRoutes)
+app.use("/api/transporte", transporteRoutes)
+app.use("/api/residuo", residuoRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

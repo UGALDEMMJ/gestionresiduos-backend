@@ -5,11 +5,8 @@ import { Request, Response } from "express";
 const getResiduoService = async (id: number): Promise<Residuo | null> => {
     const residuo = await prisma.residuo.findUnique({
         where: { id },
-
     });
-
     return residuo ? mapResiduo(residuo) : null;
-
 }
 
 const getResiduosService = async (): Promise<Residuo[]> => {
