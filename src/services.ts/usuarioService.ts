@@ -28,16 +28,16 @@ const getUsuarioByEmailService = async (email: string): Promise<Usuario | null> 
         }
     });
 
-    return {
-        id: usuario?.id || 0,
-        email: usuario?.email || "",
-        nombre: usuario?.nombre || "",
-        contrasenna: usuario?.contrasenna || "",
-        activado: usuario?.activado || false,
-        telefono: usuario?.telefono || null,
-        creado_en: usuario?.creado_en || new Date(0),
-        token: usuario?.token || undefined,
-    }
+    return usuario ? {
+        id: usuario.id,
+        email: usuario.email,
+        nombre: usuario.nombre,
+        contrasenna: usuario.contrasenna,
+        activado: usuario.activado,
+        telefono: usuario.telefono,
+        creado_en: usuario.creado_en,
+        token: usuario.token || undefined,
+    } : null;
 }
 
 
@@ -73,18 +73,12 @@ const crearUsuarioService = async (req: Request, res: Response): Promise<Usuario
         }
     });
 
-    const token = generarJWT({ id: usuario.id });
-
     await prisma.usuario.update({
         where: { id: usuario.id },
         data: {
             token: generarJWT({ id: usuario.id })
         }
     });
-
-    console.log(email, token);
-    // await enviarEmailRegistro(email, token || "");
-
     return {
         id: usuario.id,
         email: usuario.email,
@@ -162,31 +156,41 @@ const verificarUsuarioService = async (req: Request, res: Response): Promise<voi
     });
 };
 
-const manejoLoginService = async (req: Request, res: Response): Promise<Usuario | void> => {
-
+const manejoLoginService = async (req: Request, res: Response): Promise<void> => {
     const { email, contrasenna } = req.body;
-    const usuario = await getUsuarioByEmailService(email); 
-    if (!usuario) {
-        throw new Error("Usuario no encontrado");
-    }
 
-    if (!usuario.activado) {
-        throw new Error("Usuario no ha sido verificado");
-    }
-
-    if (usuario.contrasenna) {
-        const contrasennaValida = await verificarPassword(contrasenna, usuario.contrasenna);
-        if (!contrasennaValida) {
-            throw new Error("Credenciales incorrecta");
+    try {
+        const usuario = await getUsuarioByEmailService(email);
+        if (!usuario) {
+            res.status(404).json({ error: "Usuario no encontrado" });
+            return;
         }
-    }
 
-    const tokenLogin = generarJWT({ id: usuario.id });
-    await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: { token: tokenLogin }
-    });
-    console.log("Usuario autenticado:", usuario.email, "Token:", tokenLogin);
+        if (!usuario.activado) {
+            res.status(401).json({ error: "Usuario no ha sido verificado" });
+            return;
+        }
+
+        if (usuario.contrasenna) {
+            const contrasennaValida = await verificarPassword(contrasenna, usuario.contrasenna);
+            if (!contrasennaValida) {
+                res.status(401).json({ error: "Credenciales incorrectas" });
+                return;
+            }
+        }
+
+        const tokenLogin = generarJWT({ id: usuario.id });
+        await prisma.usuario.update({
+            where: { id: usuario.id },
+            data: { token: tokenLogin }
+        });
+        res.status(200).json({ token: tokenLogin });
+        return;
+    } catch (error) {
+        console.error("Error en manejoLoginService:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+        return 
+    }
 }
 
 const manejoLogOutService = async (req: Request, res: Response): Promise<void> => {

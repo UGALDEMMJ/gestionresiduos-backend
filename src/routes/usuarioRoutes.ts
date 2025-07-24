@@ -25,7 +25,7 @@ routerUsuario.route('/recuperar-contrasena/:token').post(cambioContrasenna);
 routerUsuario.route('/logout/:id').post(manejoLogOut);
 
 //Rutas privadas
-routerUsuario.route('/perfil/:id').get(authMiddleware, getUsuario);
+routerUsuario.route('/perfil/').get(authMiddleware, getUsuario);
 routerUsuario.route('/actualizar/:id').put(authMiddleware, actualizarUsuario);
 routerUsuario.route('/eliminar/:id').delete(authMiddleware, eliminarUsuario);
 

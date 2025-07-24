@@ -12,6 +12,11 @@ import {
 } from "../services.ts/usuarioService";
 
 
+interface AuthenticatedRequest extends Request {
+    user?: any; 
+}
+
+
 const getUsuarios = async (req: Request, res: Response): Promise<void> => {
     try {
         const usuarios = await getUsuariosService();
@@ -30,17 +35,25 @@ const crearUsuario = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-const getUsuario = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const usuario = await getUsuarioService(Number(req.params.id));
-        if (!usuario) {
-            res.status(404).json({ error: "Usuario no encontrado" });
-            return;
-        }
-        res.status(200).json(usuario);
-    } catch (error) {
-        res.status(500).json({ error: "Error al obtener el usuario" });
+const getUsuario = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userPayload = req.user;
+
+    const id = typeof userPayload === 'object' && userPayload !== null ? userPayload.id : null;
+    if (!id) {
+      return res.status(400).json({ error: "ID de usuario no válido en token" });
     }
+
+    const usuario = await getUsuarioService(id);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    res.json(usuario);
+  } catch (err) {
+    console.error("Error al obtener el usuario:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 };
 
 const actualizarUsuario = async (req: Request, res: Response): Promise<void> => {
@@ -75,8 +88,7 @@ const verificarUsuario = async (req: Request, res: Response): Promise<void> => {
 
 const manejoLogin = async (req: Request, res: Response): Promise<void> => {
     try {
-        const usuario = await manejoLoginService(req, res);
-        res.status(200).json({ message: "Sesión iniciada correctamente", usuario });
+        await manejoLoginService(req, res);     
     } catch (error) {
         res.status(500).json({ error: "Error al iniciar sesión" });
     }

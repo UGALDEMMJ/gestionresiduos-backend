@@ -10,13 +10,11 @@ const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunc
     if (!token) {
         return res.status(401).json({ message: 'No token provided' });
     }
-
     jwt.verify(token, process.env.SECRET as string, (err: jwt.VerifyErrors | null, decoded: any) => {
         if (err) {
             return res.status(403).json({ message: 'Failed to authenticate token' });
         }
         req.user = decoded;
-        console.log('User authenticated:', req.user);
         next();
     });
 }
