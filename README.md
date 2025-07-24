@@ -13,10 +13,10 @@ Este proyecto es el backend para la gestión de residuos, desarrollado en [UGALD
 
 ## Tecnologías utilizadas
 
-- **Lenguaje principal:** (Especificar, ej. Node.js, Python, Java, etc.)
-- **Framework:** (Ej. Express, Django, Spring Boot, etc.)
-- **Base de datos:** (Ej. PostgreSQL, MySQL, MongoDB, etc.)
-- **ORM/ODM:** (Ej. Sequelize, TypeORM, Mongoose, etc.)
+- **Lenguaje principal:** (Node.js)
+- **Framework:** (Express)
+- **Base de datos:** (PostgreSQL)
+- **ORM/ODM:** (Prisma)
 - **Control de versiones:** Git & GitHub
 
 ## Instalación
