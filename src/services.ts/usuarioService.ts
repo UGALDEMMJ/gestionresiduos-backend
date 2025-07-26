@@ -203,25 +203,40 @@ const manejoLogOutService = async (req: Request, res: Response): Promise<void> =
     });
 }
 
-const cambioContrasennaService = async (req: Request, res: Response): Promise<void> => {
-    const { token } = req.params;
-    const { contrasenna } = req.body;
+const actualizarInformacionUsuarioService = async (req: Request, res: Response): Promise<Usuario> => {
+    const { id } = req.params;
+    const { email, nombre, telefono, contrasenna } = req.body;
 
-    const usuario = await prisma.usuario.findFirst({
-        where: { token }
-    });
+    const usuarioExistente = await getUsuarioService(Number(id));
 
-    if (!usuario) {
-        res.status(404).json({ error: "Usuario no encontrado" });
-        return;
+    if (!usuarioExistente) {
+        throw new Error("Usuario no encontrado");
     }
 
-    const hashContrasenna = await hashearPassword(contrasenna);
-    await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: { contrasenna: hashContrasenna }
+    let hashContrasenna: string | undefined;
+    if (contrasenna) {
+        hashContrasenna = await hashearPassword(contrasenna);
+        if (!hashContrasenna) {
+            throw new Error("Error al hashear la contraseña");
+        }
+    }
+
+    const usuarioActualizado = await prisma.usuario.update({
+        where: { id: Number(id) },
+        data: {
+            email: email || usuarioExistente.email,
+            nombre: nombre || usuarioExistente.nombre,
+            telefono: telefono || usuarioExistente.telefono,
+            contrasenna: hashContrasenna || usuarioExistente.contrasenna,
+        },
+        include: {
+            generadores: true,
+            transportes: true,
+            residuos: true
+        }
     });
 
+    return mapUsuario(usuarioActualizado);
 };
 
 export {
@@ -234,5 +249,5 @@ export {
     verificarUsuarioService,
     manejoLoginService,
     manejoLogOutService,
-    cambioContrasennaService
+    actualizarInformacionUsuarioService
 };

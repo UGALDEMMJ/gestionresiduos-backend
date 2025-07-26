@@ -9,7 +9,7 @@ import
     manejoLogin,
     verificarUsuario,
     manejoLogOut,
-    cambioContrasenna
+    actualizarInformacionUsuario
 } from '../controllers/usuarioController';
 import authMiddleware from '../middleware/authMiddleware';
 
@@ -21,7 +21,7 @@ routerUsuario.route('/signup').post(crearUsuario);
 routerUsuario.route('/login').post(manejoLogin);
 routerUsuario.route('/verificar/:token').post(verificarUsuario);
 routerUsuario.route('/delete/:id').delete(eliminarUsuario);
-routerUsuario.route('/recuperar-contrasena/:token').post(cambioContrasenna);
+routerUsuario.route('/actualizar/:id').post(actualizarInformacionUsuario);
 routerUsuario.route('/logout/:id').post(manejoLogOut);
 
 //Rutas privadas

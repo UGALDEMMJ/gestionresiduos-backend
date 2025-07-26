@@ -8,7 +8,7 @@ import {
     verificarUsuarioService,
     manejoLoginService,
     manejoLogOutService,
-    cambioContrasennaService
+    actualizarInformacionUsuarioService
 } from "../services.ts/usuarioService";
 
 
@@ -103,14 +103,24 @@ const manejoLogOut = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-const cambioContrasenna = async (req: Request, res: Response): Promise<void> => {
+const actualizarInformacionUsuario = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        await cambioContrasennaService(req, res);
-        res.status(200).json({ message: "Contraseña cambiada correctamente" });
-    } catch (error: any) {
-        res.status(400).json({ error: error.message });
+        const userPayload = req.user;
+
+        const id = typeof userPayload === 'object' && userPayload !== null ? userPayload.id : null;
+        if (!id) {
+            return res.status(400).json({ error: "ID de usuario no válido en token" });
+        }
+
+        const usuarioActualizado = await actualizarInformacionUsuarioService(id, req.body);
+        res.status(200).json({ message: "Información del usuario actualizada correctamente", usuario: usuarioActualizado });
+    } catch (error) {
+        console.error("Error al actualizar la información del usuario:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 };
+
+
 
 export {
     getUsuarios,
@@ -121,5 +131,5 @@ export {
     verificarUsuario,
     manejoLogin,
     manejoLogOut,
-    cambioContrasenna
+    actualizarInformacionUsuario
 };
