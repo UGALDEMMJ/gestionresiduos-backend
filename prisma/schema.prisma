@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int          @id @default(autoincrement())
+  email     String       @unique
+  nombre    String
+  telefono  String?
+  contrasenna String     @db.VarChar(72)
+  token      String?
+  activado   Boolean     @default(false)
+  creado_en DateTime     @default(now())
+
+  generadores Generador[]
+  transportes Transporte[]
+  residuos    Residuo[]
+}
+
+model Generador {
+  id         Int       @id @default(autoincrement())
+  nombre     String
+  encargado  String?
+  contacto   String?
+  descripcion String?
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId  Int
+  residuos   Residuo[]
+}
+
+model Transporte {
+  id           Int       @id @default(autoincrement())
+  via_transporte String
+  contacto     String?
+  matricula    String?
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId    Int
+  residuos     Residuo[]
+}
+
+model Residuo {
+  id              Int       @id @default(autoincrement())
+  tipo            String
+  cantidad        String?
+  condicion       String?
+  fecha_coleccion DateTime?
+  preparacion     String?
+  observaciones   String?
+  imagen_url      String?
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId       Int
+  generador       Generador? @relation(fields: [generadorId], references: [id])
+  generadorId     Int?
+  transporte      Transporte? @relation(fields: [transporteId], references: [id])
+  transporteId    Int?
+  creado_en       DateTime  @default(now())
+}

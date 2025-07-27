@@ -2,5 +2,3 @@ node_modules
 dist
 .env
 sendgrid.env
-/src/generated/prisma
-/prisma
