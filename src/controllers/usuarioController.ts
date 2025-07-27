@@ -38,7 +38,6 @@ const crearUsuario = async (req: Request, res: Response): Promise<void> => {
 const getUsuario = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userPayload = req.user;
-
     const id = typeof userPayload === 'object' && userPayload !== null ? userPayload.id : null;
     if (!id) {
       return res.status(400).json({ error: "ID de usuario no válido en token" });
@@ -77,8 +76,10 @@ const eliminarUsuario = async (req: Request, res: Response): Promise<void> => {
 
 
 const verificarUsuario = async (req: Request, res: Response): Promise<void> => {
+    const { tokenUser } = req.params;
+
     try {
-        await verificarUsuarioService(req, res);
+        await verificarUsuarioService(tokenUser);
         res.status(200).json({ message: "Usuario verificado correctamente" });
     } catch (error: any) {
         res.status(400).json({ error: error.message });

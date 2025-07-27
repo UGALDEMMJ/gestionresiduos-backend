@@ -19,7 +19,7 @@ const routerUsuario = express.Router();
 routerUsuario.route('/perfiles/').get(getUsuarios);
 routerUsuario.route('/signup').post(crearUsuario);
 routerUsuario.route('/login').post(manejoLogin);
-routerUsuario.route('/verificar/:token').post(verificarUsuario);
+routerUsuario.route('/verificar/:tokenUser').post(verificarUsuario);
 routerUsuario.route('/delete/:id').delete(eliminarUsuario);
 routerUsuario.route('/actualizar/:id').post(actualizarInformacionUsuario);
 routerUsuario.route('/logout/:id').post(manejoLogOut);

@@ -69,7 +69,7 @@ const crearUsuarioService = async (req: Request, res: Response): Promise<Usuario
             email,
             nombre,
             contrasenna: hashContrasenna || "",
-            telefono: null, // Assuming telefono is optional and can be null
+            telefono: null, 
         }
     });
 
@@ -134,17 +134,13 @@ const eliminarUsuarioService = async (req: Request, res: Response): Promise<void
     });
 };
 
-const verificarUsuarioService = async (req: Request, res: Response): Promise<void> => {
-
-    const { tokenUser } = req.params;
-
+const verificarUsuarioService = async (tokenUser: string): Promise<void> => {
     const usuario = await prisma.usuario.findFirst({
         where: { token: tokenUser }
     });
 
     if (!usuario) {
-        res.status(404).json({ error: "Usuario no encontrado" });
-        return;
+        throw new Error("Usuario no encontrado");
     }
 
     await prisma.usuario.update({
@@ -184,12 +180,12 @@ const manejoLoginService = async (req: Request, res: Response): Promise<void> =>
             where: { id: usuario.id },
             data: { token: tokenLogin }
         });
-        res.status(200).json({ token: tokenLogin });
-        return;
+        res.status(200).json({ 
+            message: "Token de login generado correctamente", 
+            token: tokenLogin 
+        });
     } catch (error) {
-        console.error("Error en manejoLoginService:", error);
         res.status(500).json({ error: "Error interno del servidor" });
-        return 
     }
 }
 
